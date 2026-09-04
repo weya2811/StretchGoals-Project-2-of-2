@@ -10,8 +10,8 @@ const port = process.env.PORT || 3000;
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send("Hey");
+app.get("/api/health", (req, res) => {
+  res.send({status: "ok"});
 });
 
 app.listen(port, () => {
