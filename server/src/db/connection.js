@@ -6,6 +6,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const db = new Database(join(__dirname, 'yoga.db'));
-db.pragma('foreign-keys = ON');
+db.pragma('foreign_keys = ON');
 
 export default db;
