@@ -1,17 +1,30 @@
 import express, { json } from "express";
 import cors from "cors";
-import { config } from "dotenv";
-
-config();
+import { config } from "./config/env.js";
+import authRoutes from "./routes/auth.js";
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = config.port;
 
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+app.use(cors({ origin: config.clientUrl, credentials: true }));
 app.use(json());
 
+// Routes
 app.get("/api/health", (req, res) => {
-  res.send({status: "ok"});
+  res.json({status: "ok"});
+});
+
+app.use('/api/auth', authRoutes);
+
+// Catch all 404 errors
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Internal Server Error" });
 });
 
 app.listen(port, () => {
