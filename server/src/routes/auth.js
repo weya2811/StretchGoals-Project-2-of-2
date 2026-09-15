@@ -91,6 +91,7 @@ router.post('/register/business', async (req, res) => {
 
         const userId = userResult.lastInsertRowid;
 
+        // Register the business second
         const businessResult = db.prepare(
             "INSERT INTO businesses (name, owner_id) VALUES (?, ?)"
         ).run(business_name, userId);
