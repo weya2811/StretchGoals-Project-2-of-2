@@ -1,14 +1,14 @@
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
+import express, { json } from "express";
+import cors from "cors";
+import { config } from "dotenv";
 
-dotenv.config();
+config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
-app.use(express.json());
+app.use(json());
 
 app.get("/api/health", (req, res) => {
   res.send({status: "ok"});
