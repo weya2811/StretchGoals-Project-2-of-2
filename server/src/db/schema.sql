@@ -13,7 +13,5 @@ CREATE TABLE IF NOT EXISTS users (
     email TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     role TEXT NOT NULL DEFAULT 'student',
-    business_id INTEGER,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (business_id) REFERENCES businesses(id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
