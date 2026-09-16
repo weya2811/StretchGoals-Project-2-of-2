@@ -19,6 +19,8 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 
+
+// testing routes
 app.get('/api/test/protected', requireAuth, (req, res) => {
   res.json({ message: "Authentication works", user: req.user });
 });
