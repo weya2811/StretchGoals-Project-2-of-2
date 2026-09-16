@@ -1,7 +1,10 @@
 import express, { json } from "express";
 import cors from "cors";
 import { config } from "./config/env.js";
+
 import authRoutes from "./routes/auth.js";
+import requireAuth from "./middleware/requireAuth.js";
+import requireRole from "./middleware/requireRole.js";
 
 const app = express();
 const port = config.port;
@@ -10,11 +13,19 @@ app.use(cors({ origin: config.clientUrl, credentials: true }));
 app.use(json());
 
 // Routes
-app.get("/api/health", (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({status: "ok"});
 });
 
 app.use('/api/auth', authRoutes);
+
+app.get('/api/test/protected', requireAuth, (req, res) => {
+  res.json({ message: "Authentication works", user: req.user });
+});
+
+app.get('/api/test/owner', requireAuth, requireRole("business_owner"), (req, res) => {
+  res.json({ message: "Welcome owner", user: req.user });
+});
 
 // Catch all 404 errors
 app.use((req, res) => {
