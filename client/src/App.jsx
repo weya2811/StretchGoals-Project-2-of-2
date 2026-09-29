@@ -1,7 +1,10 @@
 import { useState } from 'react'
+
+// Components
 import LoginForm from './components/LoginForm'
 import SignupForm from './components/SignupForm'
 import BusinessDashboard from './pages/BusinessDashboard'
+
 import { getStoredUser, logout } from './api/auth'
 import './styles/App.css'
 
