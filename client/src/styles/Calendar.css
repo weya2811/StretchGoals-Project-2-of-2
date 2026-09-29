@@ -1,0 +1,30 @@
+.calendar {
+  margin-top: 16px;
+
+  /* Match FullCalendar to the plain black and white theme */
+  --fc-border-color: var(--border);
+  --fc-button-bg-color: var(--bg);
+  --fc-button-text-color: var(--text);
+  --fc-button-border-color: var(--border);
+  --fc-button-hover-bg-color: #f2f2f2;
+  --fc-button-hover-border-color: var(--border);
+  --fc-button-active-bg-color: var(--text);
+  --fc-button-active-border-color: var(--text);
+  --fc-today-bg-color: #f7f7f7;
+}
+
+.calendar .fc .fc-button-primary:not(:disabled).fc-button-active {
+  color: var(--bg);
+}
+
+.calendar .fc .fc-toolbar-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .calendar .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

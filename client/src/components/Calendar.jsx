@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import '../styles/Calendar.css';
 
 export default function YogaCalendar() {
   const [events, setEvents] = useState([
@@ -52,9 +53,9 @@ export default function YogaCalendar() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4 text-stone-800">Yoga Studio Schedule</h1>
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-stone-200">
+    <div>
+      <h1>Calendar</h1>
+      <div className="calendar">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"

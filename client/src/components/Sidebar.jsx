@@ -1,5 +1,8 @@
 // Add new pages here as the dashboard grows
-const navItems = [{ id: 'dashboard', label: 'Dashboard' }]
+const navItems = [
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'calendar', label: 'Calendar' },
+]
 
 function Sidebar({ activePage, onNavigate, onLogout }) {
   return (
