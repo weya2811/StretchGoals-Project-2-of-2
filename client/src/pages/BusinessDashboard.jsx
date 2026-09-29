@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Sidebar from '../components/Sidebar'
+import Calendar from '../components/Calendar'
 import '../styles/Dashboard.css'
 
 function BusinessDashboard({ user, onLogout }) {
@@ -20,6 +21,8 @@ function BusinessDashboard({ user, onLogout }) {
             <p>Welcome back, {user.first_name}.</p>
           </>
         )}
+
+        {activePage === 'calendar' && <Calendar />}
       </main>
     </div>
   )

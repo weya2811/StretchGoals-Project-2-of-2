@@ -66,6 +66,11 @@
     border-bottom: 1px solid var(--border);
   }
 
+  .sidebar ul {
+    display: flex;
+    gap: 4px;
+  }
+
   .sidebar button {
     width: auto;
   }
