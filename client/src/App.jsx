@@ -3,6 +3,7 @@ import { useState } from 'react'
 // Components
 import LoginForm from './components/LoginForm'
 import SignupForm from './components/SignupForm'
+import BusinessDashboard from './pages/BusinessDashboard'
 
 import { getStoredUser, logout } from './api/auth'
 import './styles/App.css'
@@ -15,6 +16,10 @@ function App() {
     logout()
     setUser(null)
     setMode('login')
+  }
+
+  if (user?.role === 'business_owner') {
+    return <BusinessDashboard user={user} onLogout={handleLogout} />
   }
 
   if (user) {
