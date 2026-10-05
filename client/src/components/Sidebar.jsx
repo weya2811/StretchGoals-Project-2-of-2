@@ -2,6 +2,7 @@
 const navItems = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'calendar', label: 'Calendar' },
+  { id: 'sales', label: 'Sales Overview' },
 ]
 
 function Sidebar({ activePage, onNavigate, onLogout }) {
