@@ -1,3 +1,4 @@
+import '../styles/SalesOverview.css'
 function SalesOverview() {
   return (
     <div className="sales-overview">
