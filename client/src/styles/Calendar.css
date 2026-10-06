@@ -33,11 +33,14 @@
 }
 
 .theme-wrapper {
+  flex: 1;
   background: var(--bg-gradient);
   min-height: 100vh;
-  padding: 2rem;
+  margin: -22px -26px;
+  padding: 22px 26px;
   color: var(--text-primary);
   transition: background 0.3s ease, color 0.3s ease;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -229,6 +232,19 @@
   font-size: 0.85rem;
   font-weight: 700;
   color: #2e3e38;
+}
+
+.fc-scroller::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.fc-scroller::-webkit-scrollbar-track {
+  background: var(--bg-gradient);
+}
+
+.fc-scroller::-webkit-scrollbar-thumb {
+  background: var(--text-primary);
+  border-radius: 0.8rem;
 }
 
 @media (max-width: 640px) {
