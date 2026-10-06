@@ -23,8 +23,8 @@ function validateRegisterationInput(first_name, surname, email, password) {
     return null;
 }
 
-// Register student user
-router.post('/register/student', async (req, res) => {
+// Register client user
+router.post('/register/client', async (req, res) => {
     let {first_name, surname, email, password} = req.body;
 
     const validationError = validateRegisterationInput(first_name, surname, email, password);
@@ -45,14 +45,14 @@ router.post('/register/student', async (req, res) => {
 
         const result = db.prepare(
             "INSERT INTO users (first_name, surname, email, password_hash, role) VALUES (?, ?, ?, ?, ?)"
-        ).run(first_name, surname, email, passwordHash, "student");
+        ).run(first_name, surname, email, passwordHash, "client");
 
         res.status(201).json({
             id: result.lastInsertRowid,
             first_name,
             surname,
             email,
-            role: "student",
+            role: "client",
         });
 
     } catch (error) {

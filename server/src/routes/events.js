@@ -16,8 +16,6 @@ router.get("/", requireAuth, (req, res) => {
         title: e.title,
         start: e.start,
         end: e.end,
-        backgroundColor: e.background_color,
-        borderColor: e.border_color,
         extendedProps: { clientId: e.client_id || "" },
     }));
 
@@ -26,21 +24,19 @@ router.get("/", requireAuth, (req, res) => {
 
 // POST /api/events — create a new event
 router.post("/", requireAuth, (req, res) => {
-    const { title, start, end, backgroundColor, borderColor, extendedProps } = req.body;
+    const { title, start, end, extendedProps } = req.body;
 
     if (!title || !start) {
         return res.status(400).json({ error: "Title and start are required" });
     }
 
     const result = db.prepare(`
-        INSERT INTO events (title, start, end, background_color, border_color, client_id, user_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO events (title, start, end, client_id, user_id)
+        VALUES (?, ?, ?, ?, ?)
     `).run(
         title,
         start,
-        end || start,
-        backgroundColor || null,
-        borderColor || null,
+        end,
         extendedProps?.clientId || null,
         req.user.userId
     );
@@ -56,18 +52,16 @@ router.put("/:id", requireAuth, (req, res) => {
 
     if (!existing) return res.status(404).json({ error: "Event not found" });
 
-    const { title, start, end, backgroundColor, borderColor, extendedProps } = req.body;
+    const { title, start, end, extendedProps } = req.body;
 
     db.prepare(`
         UPDATE events
-        SET title = ?, start = ?, end = ?, background_color = ?, border_color = ?, client_id = ?
+        SET title = ?, start = ?, end = ?, client_id = ?
         WHERE id = ?
     `).run(
         title ?? existing.title,
         start ?? existing.start,
         end ?? existing.end,
-        backgroundColor ?? existing.background_color,
-        borderColor ?? existing.border_color,
         extendedProps?.clientId ?? existing.client_id,
         req.params.id
     );

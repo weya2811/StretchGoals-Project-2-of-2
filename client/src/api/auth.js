@@ -24,7 +24,7 @@ export async function login(email, password) {
   return user
 }
 
-// role is either "student" or "business"
+// role is either "client" or "business"
 export async function signup(role, fields) {
   await post(`/register/${role}`, fields)
   // Log the new user straight in after registering

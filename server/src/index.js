@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.js";
 import requireAuth from "./middleware/requireAuth.js";
 import requireRole from "./middleware/requireRole.js";
 import eventRoutes from "./routes/events.js";
+import clientRoutes from "./routes/clients.js"
 import businessRoutes from "./routes/businesses.js";
 
 const app = express();
@@ -21,6 +22,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use("/api/events", eventRoutes);
+app.use('/api/clients', clientRoutes);
 app.use("/api/businesses", businessRoutes);
 
 // testing routes

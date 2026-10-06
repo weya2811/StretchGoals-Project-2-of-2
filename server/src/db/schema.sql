@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS businesses (
     name TEXT NOT NULL,
     owner_id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (owner_id) REFERENCES users(id)
+    FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     surname TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'student',
+    role TEXT NOT NULL DEFAULT 'client',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -22,12 +22,11 @@ CREATE TABLE IF NOT EXISTS events (
     title TEXT NOT NULL,
     start TEXT NOT NULL,
     end TEXT NOT NULL,
-    background_color TEXT,
-    border_color TEXT,
-    client_id TEXT,
+    client_id INTEGER NULL,
     user_id INTEGER NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- A student becomes a client of a business when they select it
