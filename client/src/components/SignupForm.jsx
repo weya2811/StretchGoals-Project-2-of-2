@@ -10,7 +10,7 @@ const emptyForm = {
 }
 
 function SignupForm({ onLogin, onSwitch }) {
-  const [role, setRole] = useState('student')
+  const [role, setRole] = useState('client')
   const [form, setForm] = useState(emptyForm)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)

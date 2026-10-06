@@ -9,6 +9,14 @@ import { getEvents, createEvent, updateEvent, deleteEvent } from '../api/events'
 import '../styles/Calendar.css';
 
 export default function YogaCalendar() {
+    // Themes handling
+    const [theme, setTheme] = useState('spring');
+    
+    const toggleTheme = () => {
+        setTheme((prev) => (prev === 'spring' ? 'galaxy' : 'spring'));
+    };
+
+    // Event templates
     const CLASS_TEMPLATES = [
         { title: 'Private Lesson', bg: '#fbcfe8', border: '#f43f5e' },
         { title: 'Corporate Yoga', bg: '#bbf7d0', border: '#16a34a' },
@@ -18,49 +26,54 @@ export default function YogaCalendar() {
     ];
 
     const containerRef = useRef(null);
-
     const [events, setEvents] = useState([]);
 
-    // Load events from the database on mount
+    // Fetching initial events from database
     useEffect(() => {
-        getEvents().then((data) => {
-            if (Array.isArray(data)) {
-                setEvents(data);
-            } else {
-                console.warn("getEvents returned:", data);
+        const fetchEvents = async () => {
+            try {
+                const data = await getEvents()
+                if (data) setEvents(data);
+            } catch (error) {
+                console.error("Failed to load events:", error)
             }
-        });
-    }, []);
+        }
+
+        fetchEvents();
+    }, [])
 
     // Save a new event to the DB when dropped onto the calendar
     const handleEventReceived = async (info) => {
+        const tempEvent = info.event;
+
         const newEvent = {
-            title: info.event.title,
-            start: info.event.startStr,
-            end: info.event.endStr,
-            backgroundColor: info.event.backgroundColor,
-            borderColor: info.event.borderColor,
+            title: tempEvent.title,
+            start: tempEvent.startStr,
+            end: tempEvent.endStr,
+            backgroundColor: tempEvent.backgroundColor,
+            borderColor: tempEvent.borderColor,
             extendedProps: { clientId: '' },
         };
 
-        info.event.remove(); // remove the temp FullCalendar event
+        tempEvent.remove(); // remove the temp event
 
         const saved = await createEvent(newEvent);
 
         if (saved && saved.id) {
-            setEvents((prev) => [...prev, { ...newEvent, id: saved.id }]);
+            setEvents((prev) => [...prev, {...newEvent, id:saved.id}]);
         } else {
-            console.error("Failed to save event:", saved);
+            console.log("Failed to save event:", saved);
         }
     };
 
-    // Update start/end in DB when user resizes an event
+    // Handle increasing or decreasing event times
     const handleEventResize = async (info) => {
         const { id, startStr, endStr } = info.event;
-
         setEvents((prev) =>
             prev.map((evt) =>
-                evt.id === id ? { ...evt, start: startStr, end: endStr } : evt
+                evt.id === id
+                    ? { ...evt, start: startStr, end: endStr }
+                    : evt
             )
         );
 
@@ -109,9 +122,10 @@ export default function YogaCalendar() {
             await updateEvent(id, { extendedProps: { clientId: clientVal } });
         };
 
-        // Delete from DB when the trash icon is clicked
+        // Handle removing events
         const handleDelete = async () => {
             const eventId = eventInfo.event.id;
+
             eventInfo.event.remove();
             setEvents((prev) => prev.filter((item) => item.id !== eventId));
 
@@ -169,9 +183,14 @@ export default function YogaCalendar() {
     }, []);
 
     return (
-        <div>
-            <h1>Calendar</h1>
-
+        <div className='theme-wrapper' data-theme={theme}>
+            <div className='page-header'>
+                <h1>Calendar</h1>
+                <button onClick={toggleTheme} className='theme-toggle-button'>
+                    {theme === 'spring' ? '🌙' : '☀️'}
+                </button>
+            </div>
+            
             <div ref={containerRef} className='template-bar'>
                 {CLASS_TEMPLATES.map((tpl) => (
                     <div
@@ -181,20 +200,21 @@ export default function YogaCalendar() {
                         data-bg={tpl.bg}
                         data-border={tpl.border}
                         style={{ backgroundColor: tpl.bg, '--accent-color': tpl.border }}
-                    >
+                    >   
                         <span className='badge-title'>{tpl.title}</span>
                     </div>
                 ))}
             </div>
-
-            <div className="calendar">
-                <FullCalendar
+            
+            <div className='calendar-card'>
+                <div className="calendar">
+                    <FullCalendar
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                     initialView="timeGridWeek"
                     headerToolbar={{
                         left: 'prev today next',
                         center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
                     }}
                     editable={true}
                     selectMirror={true}
@@ -211,7 +231,8 @@ export default function YogaCalendar() {
                     eventContent={renderEventContent}
                     eventDrop={handleEventDrop}
                     height="auto"
-                />
+                    />
+                </div>
             </div>
         </div>
     );
