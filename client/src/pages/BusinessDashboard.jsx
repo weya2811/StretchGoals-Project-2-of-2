@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import Calendar from '../components/Calendar'
 import SalesOverview from '../components/SalesOverview'
@@ -11,6 +11,9 @@ function BusinessDashboard({ user, onLogout }) {
 
   // 0 = current week, -1 = previous week, 1 = next week, etc.
   const [weekOffset, setWeekOffset] = useState(0)
+
+  // The scrollable weekly calendar grid, used to jump to the first class.
+  const weeklyScrollRef = useRef(null)
 
   // Controls whether Upcoming Schedule shows today or the selected week.
   const [scheduleView, setScheduleView] = useState('today')
@@ -149,6 +152,31 @@ function BusinessDashboard({ user, onLogout }) {
       )
     })
     .sort((a, b) => new Date(a.start) - new Date(b.start))
+
+  // Scroll the weekly grid so the earliest class of the week is in view,
+  // instead of always starting on empty early-morning rows.
+  useEffect(() => {
+    const scrollBox = weeklyScrollRef.current
+    if (!scrollBox) return
+
+    const startTimes = selectedWeekEvents.map((event) => {
+      const start = new Date(event.start)
+      return start.getHours() * 60 + start.getMinutes()
+    })
+
+    if (startTimes.length === 0) {
+      scrollBox.scrollTop = 0
+      return
+    }
+
+    const earliest = Math.min(...startTimes)
+    const offset =
+      ((earliest - CALENDAR_START_HOUR * 60) / 60) * HOUR_HEIGHT
+
+    // Leave half an hour of space above the first class.
+    scrollBox.scrollTop = Math.max(0, offset - HOUR_HEIGHT / 2)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboardCalendarEvents, weekOffset, activePage])
 
   const upcomingSchedule =
     scheduleView === 'today'
@@ -355,7 +383,7 @@ function BusinessDashboard({ user, onLogout }) {
                     ))}
                   </div>
 
-                  <div className="weekly-calendar-scroll">
+                  <div className="weekly-calendar-scroll" ref={weeklyScrollRef}>
                   <div
                     className="weekly-calendar-body"
                     style={{
