@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.js";
 import requireAuth from "./middleware/requireAuth.js";
 import requireRole from "./middleware/requireRole.js";
 import eventRoutes from "./routes/events.js";
+import businessRoutes from "./routes/businesses.js";
 
 const app = express();
 const port = config.port;
@@ -20,6 +21,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/businesses", businessRoutes);
 
 // testing routes
 app.get('/api/test/protected', requireAuth, (req, res) => {
