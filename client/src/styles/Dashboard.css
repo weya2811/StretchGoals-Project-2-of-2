@@ -481,14 +481,14 @@
 
   overflow: hidden;
 
-  padding: 4px 5px;
+  padding: 3px 5px;
 
   border-radius: 6px;
 
   box-sizing: border-box;
 
   font-size: 9px;
-  line-height: 1.15;
+  line-height: 1.1;
 }
 
 .calendar-event strong {
@@ -499,17 +499,22 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .calendar-event span {
   display: block;
 
+  overflow: hidden;
+
   margin-top: 2px;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
 
   color: #555555;
 
-  font-size: 8px;
+  font-size: 9px;
 }
 
 /* Event colours */

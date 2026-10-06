@@ -50,7 +50,9 @@ function BusinessDashboard({ user, onLogout }) {
   // Matches the range shown on the full calendar (6 am - 9 pm).
   const CALENDAR_START_HOUR = 6
   const CALENDAR_END_HOUR = 21
-  const HOUR_HEIGHT = 48
+  // 64px per hour makes a 30 minute class 32px, enough for title and time.
+  const HOUR_HEIGHT = 64
+  const MIN_EVENT_HEIGHT = 32
 
   const calendarHours = Array.from(
     { length: CALENDAR_END_HOUR - CALENDAR_START_HOUR },
@@ -187,7 +189,7 @@ function BusinessDashboard({ user, onLogout }) {
 
     const height = Math.max(
       ((visibleEnd - visibleStart) / 60) * HOUR_HEIGHT,
-      22
+      MIN_EVENT_HEIGHT
     )
 
     return {
@@ -397,6 +399,9 @@ function BusinessDashboard({ user, onLogout }) {
                               className={`calendar-event ${getEventColourClass(event)}`}
                               key={event.id}
                               style={getEventPosition(event)}
+                              title={`${event.title} ${formatEventTime(
+                                event.start
+                              )} – ${formatEventTime(event.end)}`}
                             >
                               <strong>{event.title}</strong>
 
