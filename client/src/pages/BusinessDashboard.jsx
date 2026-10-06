@@ -47,9 +47,10 @@ function BusinessDashboard({ user, onLogout }) {
   }
 
   // Weekly calendar display settings.
-  const CALENDAR_START_HOUR = 9
-  const CALENDAR_END_HOUR = 19
-  const HOUR_HEIGHT = 27
+  // Matches the range shown on the full calendar (6 am - 9 pm).
+  const CALENDAR_START_HOUR = 6
+  const CALENDAR_END_HOUR = 21
+  const HOUR_HEIGHT = 48
 
   const calendarHours = Array.from(
     { length: CALENDAR_END_HOUR - CALENDAR_START_HOUR },
@@ -352,6 +353,7 @@ function BusinessDashboard({ user, onLogout }) {
                     ))}
                   </div>
 
+                  <div className="weekly-calendar-scroll">
                   <div
                     className="weekly-calendar-body"
                     style={{
@@ -408,6 +410,7 @@ function BusinessDashboard({ user, onLogout }) {
                       ))}
                     </div>
 
+                  </div>
                   </div>
                 </div>
 
