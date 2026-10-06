@@ -11,6 +11,6 @@ for (const key of requiredEnvs) {
 
 export const config = {
     port: process.env.PORT || 3000,
-    jwtSecret: process.env.JWT_SECRET,
     clientUrl: process.env.CLIENT_URL,
+    jwtSecret: process.env.JWT_SECRET,
 }
