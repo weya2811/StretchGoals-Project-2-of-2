@@ -6,6 +6,8 @@ import ClientList from '../components/ClientList'
 import { getEvents } from '../api/events'
 import '../styles/Dashboard.css'
 
+import { getClients } from '../api/clients';
+
 function BusinessDashboard({ user, onLogout }) {
   // Controls which business page is currently shown.
   const [activePage, setActivePage] = useState('dashboard')
@@ -22,25 +24,43 @@ function BusinessDashboard({ user, onLogout }) {
   // Events loaded from the database.
   const [dashboardCalendarEvents, setDashboardCalendarEvents] = useState([])
 
-  // Fetch events every time we return to the dashboard
+  const [activeClients, setActiveClients] = useState(0);
+  const [classBookings, setClassBookings] = useState(0);
+
   useEffect(() => {
-    if (activePage === 'dashboard') {
-      getEvents().then((data) => {
-        if (Array.isArray(data)) {
-          setDashboardCalendarEvents(data)
-        } else {
-          console.warn("getEvents returned:", data)
+    const fetchData = async () => {
+        try {
+            // Fetch all needed data
+            const [eventsData, clientsData] = await Promise.all([
+                getEvents(),
+                getClients()
+            ])
+
+            if (eventsData && Array.isArray(eventsData)) {
+                setDashboardCalendarEvents(eventsData);
+                setClassBookings(eventsData.length);
+            } else {
+                setDashboardCalendarEvents([]);
+            }
+            if (clientsData && Array.isArray(clientsData)) {
+                setActiveClients(clientsData.length)
+            } else {
+                setActiveClients([]);
+            }
+
+        } catch (error) {
+            console.error("Failed to load calendar data:", error)
         }
-      })
     }
-  }, [activePage])
+
+      fetchData();
+  }, [])
+
 
   // Temporary dashboard statistics.
   const dashboardStats = {
-    weeklyClassBookings: 40,
     weeklyClassBookingsChange: 12,
 
-    activeClients: 28,
     activeClientsChange: 8,
 
     weeklyRevenue: 1260,
@@ -292,7 +312,7 @@ function BusinessDashboard({ user, onLogout }) {
               <div className="summary-card">
                 <div className="summary-icon">📅</div>
                 <div>
-                  <h2>{dashboardStats.weeklyClassBookings}</h2>
+                  <h2>{classBookings}</h2>
                   <p>Class Bookings</p>
                   <span className="positive-change">
                     ↑ {dashboardStats.weeklyClassBookingsChange}% vs. last week
@@ -303,7 +323,7 @@ function BusinessDashboard({ user, onLogout }) {
               <div className="summary-card">
                 <div className="summary-icon">👤</div>
                 <div>
-                  <h2>{dashboardStats.activeClients}</h2>
+                  <h2>{activeClients}</h2>
                   <p>Active Clients</p>
                   <span className="positive-change">
                     ↑ {dashboardStats.activeClientsChange}% vs. last week
