@@ -1,31 +1,105 @@
-html {
+html, body {
   overflow-y: scroll;
 }
 
-.calendar {
+[data-theme="spring"] {
+  --bg-gradient: linear-gradient(135deg, #e8f5e9 0%, #d0ebd8 100%);
+  --calendar-bg: #fffdfa;
+  --grid-border: #f0eada;
+  --text-primary: #1f3a2b;
+  --card-text-primary: #1f3a2b;
+  --text-muted: #627267;
+  --accent-green: #2e5a44;
+  --card-bg: #ffffff;
+  --button-bg: #ffffff;
+  --button-border: #e0d8c8;
+  --button-text: #1f3a2b;
+  --template-bar-bg: rgba(255, 255, 255, 0.937);
+  --input-bg: #ffffff;
+  --input-border: #e0d8c8;
+}
+
+[data-theme="galaxy"] {
+  --bg-gradient: linear-gradient(135deg, #0b0f19 0%, #11182f 50%, #1d1836 100%);
+  --calendar-bg: #11182f;
+  --grid-border: #1e2942;
+  --text-primary: #f1f5f9;  
+  --card-text-primary: #1f3a2b;
+  --text-muted: #c9dodc;
+  --accent-green: #43c6b5;
+  --card-bg: #161f38;
+  --button-bg: #161f38;
+  --button-border: #293554;
+  --button-text: #f1f5f9;
+  --template-bar-bg: rgba(22, 31, 56, 0.7);
+  --input-bg: #161f38;
+  --input-border: #293554;
+}
+
+.theme-wrapper {
+  background: var(--bg-gradient);
+  min-height: 100vh;
+  padding: 2rem;
+  color: var(--text-primary);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.page-header {
+  display: flex;
+}
+
+.theme-toggle-button {
+  background-color: transparent;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+.calendar-card {
   margin-top: 1rem;
-  --fc-border-color: var(--border);
-  --fc-button-bg-color: var(--bg);
-  --fc-button-text-color: var(--text);
-  --fc-button-border-color: var(--border);
-  --fc-button-hover-bg-color: #f2f2f2;
-  --fc-button-hover-border-color: var(--border);
-  --fc-button-active-bg-color: var(--text);
-  --fc-button-active-border-color: var(--text);
-  --fc-today-bg-color: #f7f7f7;
+  background-color: var(--calendar-bg);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+.calendar {
+  --fc-border-color: var(--grid-border);
+  --fc-page-bg-color: var(--calendar-bg);
+  --fc-neutral-bg-color: var(--calendar-bg);
+  --fc-button-bg-color: var(--button-bg);
+  --fc-button-text-color: var(--button-text);
+  --fc-button-border-color: var(--button-border);
+  --fc-button-hover-bg-color: var(--button-border);
+  --fc-button-hover-border-color: var(--button-border);
+  --fc-button-active-bg-color: var(--text-primary);
+  --fc-button-active-border-color: var(--text-primary);
+  --fc-today-bg-color: rgba(255, 255, 255, 0.05);
+}
+
+.calendar .fc-event,
+.calendar .fc-event-main,
+.calendar .fc-timegrid-event,
+.calendar .fc-daygrid-event {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
 }
 
 .calendar .fc .fc-timegrid-slot {
-  height: 4.5rem !important;
+  height: 6.5rem !important;
 }
 
 .calendar .fc .fc-button-primary:not(:disabled).fc-button-active {
-  color: var(--bg);
+  color: var(--calendar-bg);
 }
 
 .calendar .fc .fc-toolbar-title {
   font-size: 2rem;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .calendar .fc-button {
@@ -56,7 +130,8 @@ html {
   border-radius: 0.75rem;
   overflow: hidden;
   cursor: grab;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01);
+  color: var(--card-text-primary);
 }
 
 .custom-event-card::before {
@@ -70,7 +145,6 @@ html {
 }
 
 .card-header {
-  color: #000000b3;
   font-size: 1rem;
 }
 
@@ -78,7 +152,7 @@ html {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(0, 0, 0, 0.08);
   border: none;
   border-radius: 0.5rem;
   display: flex;
@@ -89,19 +163,18 @@ html {
   cursor: pointer;
   font-size: 0.9rem;
   padding: 0;
-  color: #000000;
 }
 
 .delete-button:hover {
-  background-color: rgba(0, 0, 0, 0.12);
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 .client-select {
   width: 100%;
-  font-size: 1rem;
+  font-size: 0.9rem;
   border-radius: 0.4rem;
-  border: 0.1rem solid #ccc;
-  background-color: #fff;
+  border: 1px solid var(--input-border);
+  background-color: white;
   cursor: pointer;
   outline: none;
   text-overflow: ellipsis;
@@ -109,7 +182,7 @@ html {
 }
 
 .client-select:focus {
-  border-color: #9ca3af;
+  border-color: var(--text-muted);
 }
 
 .template-bar {
@@ -118,9 +191,9 @@ html {
   gap: 0.75rem;
   margin-bottom: 1.5rem;
   padding: 0.75rem;
-  background-color: #fdfbf7;
-  border: 0.1rem solid #e5e7eb;
-  border-radius: 1rem;
+  background-color: var(--template-bar-bg);
+  border: 1px solid var(--button-border);
+  border-radius: 0.5rem;
 }
 
 .draggable-badge {

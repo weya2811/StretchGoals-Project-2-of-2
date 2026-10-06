@@ -8,6 +8,17 @@ import { Draggable } from '@fullcalendar/interaction';
 import '../styles/Calendar.css';
 
 export default function YogaCalendar() {
+    // Themes handling
+    const [theme, setTheme] = useState(() => {
+        return 'spring';
+    });
+    
+    const toggleTheme = () => {
+        const nextTheme = theme === 'spring' ? 'galaxy' : 'spring';
+        setTheme(nextTheme);
+    }
+
+    // Event templates
     const CLASS_TEMPLATES = [
         { title: 'Private Lesson', bg: '#fbcfe8', border: '#f43f5e' },
         { title: 'Corporate Yoga', bg: '#bbf7d0', border: '#16a34a' },
@@ -20,6 +31,7 @@ export default function YogaCalendar() {
 
     const [events, setEvents] = useState([]);
 
+    // Handle when an event is created and added to the calendar
     const handleEventReceived = (info) => {
         const eventId = info.event.id || String(Date.now());
 
@@ -40,6 +52,7 @@ export default function YogaCalendar() {
         setEvents((prev) => [...prev, newEvent])
     }
 
+    // Handle increasing or decreasing event times
     const handleEventResize = (info) => {
         const { id, startStr, endStr } = info.event;
         setEvents((prev) =>
@@ -51,6 +64,7 @@ export default function YogaCalendar() {
         );
     };
 
+    // Handle when events get moved to different time slots
     const handleEventDrop = (info) => {
         const { id, startStr, endStr } = info.event;
         setEvents((prev) =>
@@ -89,6 +103,7 @@ export default function YogaCalendar() {
                 );
         };
 
+        // Handle removing events
         const handleDelete = () => {
             const eventId = eventInfo.event.id;
             eventInfo.event.remove();
@@ -147,50 +162,57 @@ export default function YogaCalendar() {
     }, [])
 
     return (
-        <div>
-        <h1>Calendar</h1>
-        
-        <div ref={containerRef} className='template-bar'>
-            {CLASS_TEMPLATES.map((tpl) => (
-                <div
-                    key={tpl.title}
-                    className='draggable-badge'
-                    data-title={tpl.title}
-                    data-bg={tpl.bg}
-                    data-border={tpl.border}
-                    style={{ backgroundColor: tpl.bg, '--accent-color': tpl.border }}
-                >   
-                    <span className='badge-title'>{tpl.title}</span>
+        <div className='theme-wrapper' data-theme={theme}>
+            <div className='page-header'>
+                <h1>Calendar</h1>
+                <button onClick={toggleTheme} className='theme-toggle-button'>
+                    {theme === 'spring' ? '🌙' : '☀️'}
+                </button>
+            </div>
+            
+            <div ref={containerRef} className='template-bar'>
+                {CLASS_TEMPLATES.map((tpl) => (
+                    <div
+                        key={tpl.title}
+                        className='draggable-badge'
+                        data-title={tpl.title}
+                        data-bg={tpl.bg}
+                        data-border={tpl.border}
+                        style={{ backgroundColor: tpl.bg, '--accent-color': tpl.border }}
+                    >   
+                        <span className='badge-title'>{tpl.title}</span>
+                    </div>
+                ))}
+            </div>
+            
+            <div className='calendar-card'>
+                <div className="calendar">
+                    <FullCalendar
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                    initialView="timeGridWeek"
+                    headerToolbar={{
+                        left: 'prev today next',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    }}
+                    editable={true}
+                    selectMirror={true}
+                    droppable={true}
+                    dayMaxEvents={true}
+                    slotEventOverlap={false}
+                    eventOverlap={false}
+                    allDaySlot={false}
+                    slotMinTime="06:00:00"
+                    slotMaxTime="21:00:00"
+                    events={events}
+                    eventReceive={handleEventReceived}
+                    eventResize={handleEventResize}
+                    eventContent={renderEventContent}
+                    eventDrop={handleEventDrop}
+                    height="auto"
+                    />
                 </div>
-            ))}
-        </div>
-
-        <div className="calendar">
-            <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            initialView="timeGridWeek"
-            headerToolbar={{
-                left: 'prev today next',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            }}
-            editable={true}
-            selectMirror={true}
-            droppable={true}
-            dayMaxEvents={true}
-            slotEventOverlap={false}
-            eventOverlap={false}
-            allDaySlot={false}
-            slotMinTime="06:00:00"
-            slotMaxTime="21:00:00"
-            events={events}
-            eventReceive={handleEventReceived}
-            eventResize={handleEventResize}
-            eventContent={renderEventContent}
-            eventDrop={handleEventDrop}
-            height="auto"
-            />
-        </div>
+            </div>
         </div>
     );
 }
