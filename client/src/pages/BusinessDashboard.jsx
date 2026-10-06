@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import Calendar from '../components/Calendar'
+import SalesOverview from '../components/SalesOverview'
+import { getEvents } from '../api/events'
 import '../styles/Dashboard.css'
 
 function BusinessDashboard({ user, onLogout }) {
@@ -13,8 +15,23 @@ function BusinessDashboard({ user, onLogout }) {
   // Controls whether Upcoming Schedule shows today or the selected week.
   const [scheduleView, setScheduleView] = useState('today')
 
+  // Events loaded from the database.
+  const [dashboardCalendarEvents, setDashboardCalendarEvents] = useState([])
+
+  // Fetch events every time we return to the dashboard
+  useEffect(() => {
+    if (activePage === 'dashboard') {
+      getEvents().then((data) => {
+        if (Array.isArray(data)) {
+          setDashboardCalendarEvents(data)
+        } else {
+          console.warn("getEvents returned:", data)
+        }
+      })
+    }
+  }, [activePage])
+
   // Temporary dashboard statistics.
-  // Later these should come from the backend/database.
   const dashboardStats = {
     weeklyClassBookings: 40,
     weeklyClassBookingsChange: 12,
@@ -29,95 +46,7 @@ function BusinessDashboard({ user, onLogout }) {
     weeklyNewClientsChange: 20,
   }
 
-  // Temporary calendar-style data.
-  // Both Weekly Overview and Upcoming Schedule use this same source.
-  // Later this can be replaced with real calendar/backend event data.
-  const dashboardCalendarEvents = [
-    {
-      id: '1',
-      title: 'Power Yoga',
-      start: '2026-10-05T09:00:00',
-      end: '2026-10-05T10:00:00',
-      instructor: 'Sarah M.',
-      booked: 8,
-      capacity: 12,
-    },
-    {
-      id: '2',
-      title: 'Personal Training',
-      start: '2026-10-05T11:30:00',
-      end: '2026-10-05T12:30:00',
-      instructor: 'James T.',
-      booked: 1,
-      capacity: 1,
-    },
-    {
-      id: '3',
-      title: 'Gentle Flow',
-      start: '2026-10-06T14:00:00',
-      end: '2026-10-06T15:00:00',
-      instructor: 'Emily R.',
-      booked: 12,
-      capacity: 14,
-    },
-    {
-      id: '4',
-      title: 'Yin Yoga',
-      start: '2026-10-07T17:30:00',
-      end: '2026-10-07T18:30:00',
-      instructor: 'Michael K.',
-      booked: 6,
-      capacity: 10,
-    },
-    {
-      id: '5',
-      title: 'Vinyasa Flow',
-      start: '2026-10-08T09:00:00',
-      end: '2026-10-08T10:00:00',
-      instructor: 'Sarah M.',
-      booked: 10,
-      capacity: 12,
-    },
-    {
-      id: '6',
-      title: 'Mat Pilates',
-      start: '2026-10-09T16:00:00',
-      end: '2026-10-09T17:00:00',
-      instructor: 'James T.',
-      booked: 9,
-      capacity: 12,
-    },
-    {
-      id: '7',
-      title: 'Gentle Flow',
-      start: '2026-10-10T09:30:00',
-      end: '2026-10-10T10:30:00',
-      instructor: 'Emily R.',
-      booked: 11,
-      capacity: 14,
-    },
-    {
-      id: '8',
-      title: 'Power Yoga',
-      start: '2026-10-10T12:00:00',
-      end: '2026-10-10T13:00:00',
-      instructor: 'Sarah M.',
-      booked: 8,
-      capacity: 12,
-    },
-    {
-      id: '9',
-      title: 'Yin Yoga',
-      start: '2026-10-11T10:00:00',
-      end: '2026-10-11T11:00:00',
-      instructor: 'Michael K.',
-      booked: 5,
-      capacity: 10,
-    },
-  ]
-
   // Weekly calendar display settings.
-  // The grid runs from 9 AM until 7 PM so evening classes remain visible.
   const CALENDAR_START_HOUR = 9
   const CALENDAR_END_HOUR = 19
   const HOUR_HEIGHT = 27
@@ -127,14 +56,12 @@ function BusinessDashboard({ user, onLogout }) {
     (_, index) => CALENDAR_START_HOUR + index
   )
 
-  // Returns a copy of a date a certain number of days away.
   const addDays = (date, numberOfDays) => {
     const newDate = new Date(date)
     newDate.setDate(newDate.getDate() + numberOfDays)
     return newDate
   }
 
-  // Returns Monday at the beginning of a supplied date's week.
   const getStartOfWeek = (date) => {
     const weekStart = new Date(date)
     const day = weekStart.getDay()
@@ -146,7 +73,6 @@ function BusinessDashboard({ user, onLogout }) {
     return weekStart
   }
 
-  // Checks whether two Date objects represent the same calendar date.
   const isSameDay = (firstDate, secondDate) => {
     return (
       firstDate.getFullYear() === secondDate.getFullYear() &&
@@ -155,7 +81,6 @@ function BusinessDashboard({ user, onLogout }) {
     )
   }
 
-  // Formats a calendar time such as 09:00 into 9:00 am.
   const formatEventTime = (dateTime) => {
     return new Date(dateTime).toLocaleTimeString('en-AU', {
       hour: 'numeric',
@@ -163,7 +88,6 @@ function BusinessDashboard({ user, onLogout }) {
     })
   }
 
-  // Formats the hour labels shown down the left side of Weekly Overview.
   const formatHourLabel = (hour) => {
     const hourDate = new Date()
     hourDate.setHours(hour, 0, 0, 0)
@@ -173,10 +97,8 @@ function BusinessDashboard({ user, onLogout }) {
     })
   }
 
-  // Current date used by the Today filter.
   const today = new Date()
 
-  // Calculates which week is currently selected.
   const selectedWeekStart = addDays(
     getStartOfWeek(today),
     weekOffset * 7
@@ -185,7 +107,6 @@ function BusinessDashboard({ user, onLogout }) {
   const selectedWeekEnd = addDays(selectedWeekStart, 6)
   selectedWeekEnd.setHours(23, 59, 59, 999)
 
-  // Date label between the previous/next week arrows.
   const selectedWeekLabel = `${selectedWeekStart.toLocaleDateString('en-AU', {
     day: 'numeric',
     month: 'short',
@@ -195,8 +116,6 @@ function BusinessDashboard({ user, onLogout }) {
     year: 'numeric',
   })}`
 
-  // Always creates Monday-Sunday.
-  // Events from the shared source are placed into their correct day.
   const weeklyOverview = Array.from({ length: 7 }, (_, index) => {
     const date = addDays(selectedWeekStart, index)
 
@@ -217,7 +136,6 @@ function BusinessDashboard({ user, onLogout }) {
     }
   })
 
-  // Events belonging to the currently selected week.
   const selectedWeekEvents = dashboardCalendarEvents
     .filter((event) => {
       const eventDate = new Date(event.start)
@@ -229,8 +147,6 @@ function BusinessDashboard({ user, onLogout }) {
     })
     .sort((a, b) => new Date(a.start) - new Date(b.start))
 
-  // Today = only today's events.
-  // Week = all events belonging to the selected week.
   const upcomingSchedule =
     scheduleView === 'today'
       ? dashboardCalendarEvents
@@ -238,7 +154,6 @@ function BusinessDashboard({ user, onLogout }) {
           .sort((a, b) => new Date(a.start) - new Date(b.start))
       : selectedWeekEvents
 
-  // Groups the week schedule by day so Week view is easier to scan.
   const groupedWeekSchedule = weeklyOverview
     .filter((day) => day.events.length > 0)
     .map((day) => ({
@@ -250,8 +165,6 @@ function BusinessDashboard({ user, onLogout }) {
       }),
     }))
 
-  // Calculates where an event should appear vertically in Weekly Overview.
-  // Empty time therefore remains visible as empty space.
   const getEventPosition = (event) => {
     const startDate = new Date(event.start)
     const endDate = new Date(event.end)
@@ -282,21 +195,19 @@ function BusinessDashboard({ user, onLogout }) {
     }
   }
 
-  // Gives different class types slightly different colours.
-  const getEventColourClass = (title) => {
-    const colourClasses = {
-      'Power Yoga': 'event-green',
-      'Personal Training': 'event-orange',
-      'Gentle Flow': 'event-blue',
-      'Yin Yoga': 'event-pink',
-      'Vinyasa Flow': 'event-purple',
-      'Mat Pilates': 'event-yellow',
+  // Maps the calendar's hex colour to the dashboard's CSS class.
+  const getEventColourClass = (event) => {
+    const colourMap = {
+      '#fbcfe8': 'event-pink',     // Private Lesson
+      '#bbf7d0': 'event-green',    // Corporate Yoga
+      '#bae6fd': 'event-blue',     // Yoga Therapy
+      '#fef08a': 'event-yellow',   // Personal Time
+      '#e9d5ff': 'event-purple',   // Yoga Class
     }
 
-    return colourClasses[title] || 'event-green'
+    return colourMap[event.backgroundColor] || 'event-green'
   }
 
-  // Shared Upcoming Schedule event row.
   const renderScheduleRow = (item) => (
     <div className="schedule-row" key={item.id}>
       <div className="schedule-time">
@@ -305,15 +216,17 @@ function BusinessDashboard({ user, onLogout }) {
 
       <div className="schedule-details">
         <strong>{item.title}</strong>
-        <span>{item.instructor}</span>
+        {item.instructor && <span>{item.instructor}</span>}
       </div>
 
-      <div className="schedule-attendance">
-        <span className="attendance-icon">👥</span>
-        <span>
-          {item.booked}/{item.capacity}
-        </span>
-      </div>
+      {item.booked != null && item.capacity != null && (
+        <div className="schedule-attendance">
+          <span className="attendance-icon">👥</span>
+          <span>
+            {item.booked}/{item.capacity}
+          </span>
+        </div>
+      )}
     </div>
   )
 
@@ -332,7 +245,6 @@ function BusinessDashboard({ user, onLogout }) {
         {activePage === 'dashboard' && (
           <div className="dashboard-content">
 
-            {/* Dashboard heading */}
             <div className="dashboard-header">
               <p className="dashboard-label">Dashboard</p>
 
@@ -343,7 +255,6 @@ function BusinessDashboard({ user, onLogout }) {
               </p>
             </div>
 
-            {/* High-level business statistics */}
             <div className="summary-grid">
 
               <div className="summary-card">
@@ -392,10 +303,8 @@ function BusinessDashboard({ user, onLogout }) {
 
             </div>
 
-            {/* Weekly Overview + Upcoming Schedule */}
             <div className="dashboard-lower-grid">
 
-              {/* Weekly Overview */}
               <section className="weekly-overview">
 
                 <div className="panel-header weekly-panel-header">
@@ -427,10 +336,8 @@ function BusinessDashboard({ user, onLogout }) {
                   </div>
                 </div>
 
-                {/* Calendar-style timeline */}
                 <div className="weekly-calendar">
 
-                  {/* Day headings */}
                   <div className="weekly-calendar-header">
                     <div className="time-header-spacer" />
 
@@ -445,7 +352,6 @@ function BusinessDashboard({ user, onLogout }) {
                     ))}
                   </div>
 
-                  {/* Timed calendar body */}
                   <div
                     className="weekly-calendar-body"
                     style={{
@@ -455,7 +361,6 @@ function BusinessDashboard({ user, onLogout }) {
                       }px`,
                     }}
                   >
-                    {/* Hour labels */}
                     <div className="calendar-time-axis">
                       {calendarHours.map((hour, index) => (
                         <span
@@ -469,14 +374,12 @@ function BusinessDashboard({ user, onLogout }) {
                       ))}
                     </div>
 
-                    {/* Seven calendar day columns */}
                     <div className="calendar-day-tracks">
                       {weeklyOverview.map((day) => (
                         <div
                           className="calendar-day-track"
                           key={day.date.toISOString()}
                         >
-                          {/* Horizontal hour lines */}
                           {calendarHours.map((hour, index) => (
                             <div
                               className="calendar-hour-line"
@@ -487,12 +390,9 @@ function BusinessDashboard({ user, onLogout }) {
                             />
                           ))}
 
-                          {/* Events positioned according to start/end time */}
                           {day.events.map((event) => (
                             <div
-                              className={`calendar-event ${getEventColourClass(
-                                event.title
-                              )}`}
+                              className={`calendar-event ${getEventColourClass(event)}`}
                               key={event.id}
                               style={getEventPosition(event)}
                             >
@@ -522,7 +422,6 @@ function BusinessDashboard({ user, onLogout }) {
 
               </section>
 
-              {/* Upcoming Schedule */}
               <section className="upcoming-schedule">
 
                 <div className="panel-header">
@@ -547,7 +446,6 @@ function BusinessDashboard({ user, onLogout }) {
                   </select>
                 </div>
 
-                {/* Fixed-size scrolling content area */}
                 <div className="schedule-list">
 
                   {scheduleView === 'today' ? (
@@ -567,7 +465,6 @@ function BusinessDashboard({ user, onLogout }) {
                           className="schedule-day-group"
                           key={day.date.toISOString()}
                         >
-                          {/* Clearly separates each day in Week view */}
                           <div className="schedule-day-heading">
                             {day.label}
                           </div>
@@ -602,9 +499,8 @@ function BusinessDashboard({ user, onLogout }) {
           </div>
         )}
 
-        {/* Existing full calendar remains untouched */}
         {activePage === 'calendar' && <Calendar />}
-
+        {activePage === 'sales' && <SalesOverview />}
       </main>
     </div>
   )

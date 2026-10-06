@@ -4,19 +4,17 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { Draggable } from '@fullcalendar/interaction';
+import { getEvents, createEvent, updateEvent, deleteEvent } from '../api/events';
 
 import '../styles/Calendar.css';
 
 export default function YogaCalendar() {
     // Themes handling
-    const [theme, setTheme] = useState(() => {
-        return 'spring';
-    });
+    const [theme, setTheme] = useState('spring');
     
     const toggleTheme = () => {
-        const nextTheme = theme === 'spring' ? 'galaxy' : 'spring';
-        setTheme(nextTheme);
-    }
+        setTheme((prev) => (prev === 'spring' ? 'galaxy' : 'spring'));
+    };
 
     // Event templates
     const CLASS_TEMPLATES = [
@@ -24,36 +22,52 @@ export default function YogaCalendar() {
         { title: 'Corporate Yoga', bg: '#bbf7d0', border: '#16a34a' },
         { title: 'Yoga Therapy', bg: '#bae6fd', border: '#0284c7' },
         { title: 'Personal Time', bg: '#fef08a', border: '#ca8a04' },
-        { title: 'Yoga Class', bg: '#e9d5ff', border: '#9333ea' } 
+        { title: 'Yoga Class', bg: '#e9d5ff', border: '#9333ea' }
     ];
 
     const containerRef = useRef(null);
-
     const [events, setEvents] = useState([]);
 
-    // Handle when an event is created and added to the calendar
-    const handleEventReceived = (info) => {
-        const eventId = info.event.id || String(Date.now());
-
-        const newEvent = {
-            id: eventId,
-            title: info.event.title,
-            start: info.event.startStr,
-            end: info.event.endStr,
-            backgroundColor: info.event.backgroundColor,
-            borderColor: info.event.borderColor,
-            extendedProps: {
-                clientId: '',
+    // Fetching initial events from database
+    useEffect(() => {
+        const fetchEvents = async () => {
+            try {
+                const data = await getEvents()
+                if (data) setEvents(data);
+            } catch (error) {
+                console.error("Failed to load events:", error)
             }
         }
 
-        info.event.remove();
+        fetchEvents();
+    }, [])
 
-        setEvents((prev) => [...prev, newEvent])
-    }
+    // Save a new event to the DB when dropped onto the calendar
+    const handleEventReceived = async (info) => {
+        const tempEvent = info.event;
+
+        const newEvent = {
+            title: tempEvent.title,
+            start: tempEvent.startStr,
+            end: tempEvent.endStr,
+            backgroundColor: tempEvent.backgroundColor,
+            borderColor: tempEvent.borderColor,
+            extendedProps: { clientId: '' },
+        };
+
+        tempEvent.remove(); // remove the temp event
+
+        const saved = await createEvent(newEvent);
+
+        if (saved && saved.id) {
+            setEvents((prev) => [...prev, {...newEvent, id:saved.id}]);
+        } else {
+            console.log("Failed to save event:", saved);
+        }
+    };
 
     // Handle increasing or decreasing event times
-    const handleEventResize = (info) => {
+    const handleEventResize = async (info) => {
         const { id, startStr, endStr } = info.event;
         setEvents((prev) =>
             prev.map((evt) =>
@@ -62,31 +76,34 @@ export default function YogaCalendar() {
                     : evt
             )
         );
+
+        await updateEvent(id, { start: startStr, end: endStr });
     };
 
-    // Handle when events get moved to different time slots
-    const handleEventDrop = (info) => {
+    // Update start/end in DB when user drags an event to a new time
+    const handleEventDrop = async (info) => {
         const { id, startStr, endStr } = info.event;
+
         setEvents((prev) =>
             prev.map((evt) =>
-            evt.id === id ? { ...evt, start: startStr, end: endStr } : evt
+                evt.id === id ? { ...evt, start: startStr, end: endStr } : evt
             )
         );
+
+        await updateEvent(id, { start: startStr, end: endStr });
     };
 
     const renderEventContent = (eventInfo) => {
         const { title, extendedProps, id, backgroundColor, borderColor } = eventInfo.event;
 
-        // Sample list
         const clients = ["Client A", "Client B"];
-
         const selectedClient = extendedProps?.clientId || '';
 
-        const handleClientChange = (e) => {
+        // Update client in DB when the dropdown changes
+        const handleClientChange = async (e) => {
             const clientVal = e.target.value;
-            
-            // Update client
-            eventInfo.event.setExtendedProp('clientId', clientVal)
+
+            eventInfo.event.setExtendedProp('clientId', clientVal);
 
             setEvents((prev) =>
                 prev.map((evt) =>
@@ -99,19 +116,24 @@ export default function YogaCalendar() {
                             },
                         }
                         : evt
-                    )
-                );
+                )
+            );
+
+            await updateEvent(id, { extendedProps: { clientId: clientVal } });
         };
 
         // Handle removing events
-        const handleDelete = () => {
+        const handleDelete = async () => {
             const eventId = eventInfo.event.id;
+
             eventInfo.event.remove();
             setEvents((prev) => prev.filter((item) => item.id !== eventId));
-        }
+
+            await deleteEvent(eventId);
+        };
 
         return (
-            <div 
+            <div
                 className='custom-event-card'
                 style={{
                     backgroundColor: backgroundColor || '#fff',
@@ -130,15 +152,14 @@ export default function YogaCalendar() {
                     onClick={(e) => e.stopPropagation()}
                     className='client-select'
                 >
-                    
                     <option value="">Select a client</option>
                     {clients.map((client) => (
                         <option key={client} value={client}>{client}</option>
                     ))}
                 </select>
             </div>
-        )
-    }
+        );
+    };
 
     useEffect(() => {
         if (containerRef.current) {
@@ -149,17 +170,17 @@ export default function YogaCalendar() {
                         title: eventElement.dataset.title,
                         backgroundColor: eventElement.dataset.bg,
                         borderColor: eventElement.dataset.border,
-                        duration: '00:30', // Default duration
+                        duration: '00:30',
                         extendedProps: {
-                            clientId: '', // Unassigned initially
+                            clientId: '',
                         },
-                    }
-                }
-            })
+                    };
+                },
+            });
 
             return () => draggable.destroy();
         }
-    }, [])
+    }, []);
 
     return (
         <div className='theme-wrapper' data-theme={theme}>
