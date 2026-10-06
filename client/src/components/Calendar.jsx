@@ -4,6 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { Draggable } from '@fullcalendar/interaction';
+import { getEvents, createEvent, updateEvent, deleteEvent } from '../api/events';
 
 import '../styles/Calendar.css';
 
@@ -13,66 +14,83 @@ export default function YogaCalendar() {
         { title: 'Corporate Yoga', bg: '#bbf7d0', border: '#16a34a' },
         { title: 'Yoga Therapy', bg: '#bae6fd', border: '#0284c7' },
         { title: 'Personal Time', bg: '#fef08a', border: '#ca8a04' },
-        { title: 'Yoga Class', bg: '#e9d5ff', border: '#9333ea' } 
+        { title: 'Yoga Class', bg: '#e9d5ff', border: '#9333ea' }
     ];
 
     const containerRef = useRef(null);
 
     const [events, setEvents] = useState([]);
 
-    const handleEventReceived = (info) => {
-        const eventId = info.event.id || String(Date.now());
+    // Load events from the database on mount
+    useEffect(() => {
+        getEvents().then((data) => {
+            if (Array.isArray(data)) {
+                setEvents(data);
+            } else {
+                console.warn("getEvents returned:", data);
+            }
+        });
+    }, []);
 
+    // Save a new event to the DB when dropped onto the calendar
+    const handleEventReceived = async (info) => {
         const newEvent = {
-            id: eventId,
             title: info.event.title,
             start: info.event.startStr,
             end: info.event.endStr,
             backgroundColor: info.event.backgroundColor,
             borderColor: info.event.borderColor,
-            extendedProps: {
-                clientId: '',
-            }
+            extendedProps: { clientId: '' },
+        };
+
+        info.event.remove(); // remove the temp FullCalendar event
+
+        const saved = await createEvent(newEvent);
+
+        if (saved && saved.id) {
+            setEvents((prev) => [...prev, { ...newEvent, id: saved.id }]);
+        } else {
+            console.error("Failed to save event:", saved);
         }
-
-        info.event.remove();
-
-        setEvents((prev) => [...prev, newEvent])
-    }
-
-    const handleEventResize = (info) => {
-        const { id, startStr, endStr } = info.event;
-        setEvents((prev) =>
-            prev.map((evt) =>
-                evt.id === id
-                    ? { ...evt, start: startStr, end: endStr }
-                    : evt
-            )
-        );
     };
 
-    const handleEventDrop = (info) => {
+    // Update start/end in DB when user resizes an event
+    const handleEventResize = async (info) => {
         const { id, startStr, endStr } = info.event;
+
         setEvents((prev) =>
             prev.map((evt) =>
-            evt.id === id ? { ...evt, start: startStr, end: endStr } : evt
+                evt.id === id ? { ...evt, start: startStr, end: endStr } : evt
             )
         );
+
+        await updateEvent(id, { start: startStr, end: endStr });
+    };
+
+    // Update start/end in DB when user drags an event to a new time
+    const handleEventDrop = async (info) => {
+        const { id, startStr, endStr } = info.event;
+
+        setEvents((prev) =>
+            prev.map((evt) =>
+                evt.id === id ? { ...evt, start: startStr, end: endStr } : evt
+            )
+        );
+
+        await updateEvent(id, { start: startStr, end: endStr });
     };
 
     const renderEventContent = (eventInfo) => {
         const { title, extendedProps, id, backgroundColor, borderColor } = eventInfo.event;
 
-        // Sample list
         const clients = ["Client A", "Client B"];
-
         const selectedClient = extendedProps?.clientId || '';
 
-        const handleClientChange = (e) => {
+        // Update client in DB when the dropdown changes
+        const handleClientChange = async (e) => {
             const clientVal = e.target.value;
-            
-            // Update client
-            eventInfo.event.setExtendedProp('clientId', clientVal)
+
+            eventInfo.event.setExtendedProp('clientId', clientVal);
 
             setEvents((prev) =>
                 prev.map((evt) =>
@@ -85,18 +103,23 @@ export default function YogaCalendar() {
                             },
                         }
                         : evt
-                    )
-                );
+                )
+            );
+
+            await updateEvent(id, { extendedProps: { clientId: clientVal } });
         };
 
-        const handleDelete = () => {
+        // Delete from DB when the trash icon is clicked
+        const handleDelete = async () => {
             const eventId = eventInfo.event.id;
             eventInfo.event.remove();
             setEvents((prev) => prev.filter((item) => item.id !== eventId));
-        }
+
+            await deleteEvent(eventId);
+        };
 
         return (
-            <div 
+            <div
                 className='custom-event-card'
                 style={{
                     backgroundColor: backgroundColor || '#fff',
@@ -115,15 +138,14 @@ export default function YogaCalendar() {
                     onClick={(e) => e.stopPropagation()}
                     className='client-select'
                 >
-                    
                     <option value="">Select a client</option>
                     {clients.map((client) => (
                         <option key={client} value={client}>{client}</option>
                     ))}
                 </select>
             </div>
-        )
-    }
+        );
+    };
 
     useEffect(() => {
         if (containerRef.current) {
@@ -134,63 +156,63 @@ export default function YogaCalendar() {
                         title: eventElement.dataset.title,
                         backgroundColor: eventElement.dataset.bg,
                         borderColor: eventElement.dataset.border,
-                        duration: '00:30', // Default duration
+                        duration: '00:30',
                         extendedProps: {
-                            clientId: '', // Unassigned initially
+                            clientId: '',
                         },
-                    }
-                }
-            })
+                    };
+                },
+            });
 
             return () => draggable.destroy();
         }
-    }, [])
+    }, []);
 
     return (
         <div>
-        <h1>Calendar</h1>
-        
-        <div ref={containerRef} className='template-bar'>
-            {CLASS_TEMPLATES.map((tpl) => (
-                <div
-                    key={tpl.title}
-                    className='draggable-badge'
-                    data-title={tpl.title}
-                    data-bg={tpl.bg}
-                    data-border={tpl.border}
-                    style={{ backgroundColor: tpl.bg, '--accent-color': tpl.border }}
-                >   
-                    <span className='badge-title'>{tpl.title}</span>
-                </div>
-            ))}
-        </div>
+            <h1>Calendar</h1>
 
-        <div className="calendar">
-            <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            initialView="timeGridWeek"
-            headerToolbar={{
-                left: 'prev today next',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            }}
-            editable={true}
-            selectMirror={true}
-            droppable={true}
-            dayMaxEvents={true}
-            slotEventOverlap={false}
-            eventOverlap={false}
-            allDaySlot={false}
-            slotMinTime="06:00:00"
-            slotMaxTime="21:00:00"
-            events={events}
-            eventReceive={handleEventReceived}
-            eventResize={handleEventResize}
-            eventContent={renderEventContent}
-            eventDrop={handleEventDrop}
-            height="auto"
-            />
-        </div>
+            <div ref={containerRef} className='template-bar'>
+                {CLASS_TEMPLATES.map((tpl) => (
+                    <div
+                        key={tpl.title}
+                        className='draggable-badge'
+                        data-title={tpl.title}
+                        data-bg={tpl.bg}
+                        data-border={tpl.border}
+                        style={{ backgroundColor: tpl.bg, '--accent-color': tpl.border }}
+                    >
+                        <span className='badge-title'>{tpl.title}</span>
+                    </div>
+                ))}
+            </div>
+
+            <div className="calendar">
+                <FullCalendar
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                    initialView="timeGridWeek"
+                    headerToolbar={{
+                        left: 'prev today next',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay',
+                    }}
+                    editable={true}
+                    selectMirror={true}
+                    droppable={true}
+                    dayMaxEvents={true}
+                    slotEventOverlap={false}
+                    eventOverlap={false}
+                    allDaySlot={false}
+                    slotMinTime="06:00:00"
+                    slotMaxTime="21:00:00"
+                    events={events}
+                    eventReceive={handleEventReceived}
+                    eventResize={handleEventResize}
+                    eventContent={renderEventContent}
+                    eventDrop={handleEventDrop}
+                    height="auto"
+                />
+            </div>
         </div>
     );
 }
