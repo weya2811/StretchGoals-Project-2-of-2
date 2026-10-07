@@ -60,6 +60,15 @@
   color: var(--bg);
 }
 
+.sidebar button.sidebar-logout {
+  color: #d92d20;
+}
+
+.sidebar button.sidebar-logout:hover {
+  background: #d92d20;
+  color: #fff;
+}
+
 /* -------------------- */
 /* MAIN DASHBOARD       */
 /* -------------------- */
