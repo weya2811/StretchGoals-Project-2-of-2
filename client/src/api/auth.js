@@ -1,26 +1,40 @@
 const API_URL = import.meta.env.VITE_API_URL ?? ''
-
 const TOKEN_KEY = 'token'
-const USER_KEY = 'user'
 
-async function post(path, body) {
+async function request(path, options = {}) {
+  const token = getToken()
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token ? {Authorization: `Bearer ${token}`} : {}),
+    ...options.headers,
+  }
+
   const res = await fetch(`${API_URL}/api/auth${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    ...options,
+    headers,
   })
 
   const data = await res.json().catch(() => ({}))
+
   if (!res.ok) {
-    throw new Error(data.error || 'Something went wrong')
+    const error = new Error(data.error || 'Something went wrong')
+    error.status = res.status
+    throw error
   }
+
   return data
+}
+
+export async function post(path, body) {
+  return request(path, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
 }
 
 export async function login(email, password) {
   const { token, user } = await post('/login', { email, password })
   localStorage.setItem(TOKEN_KEY, token)
-  localStorage.setItem(USER_KEY, JSON.stringify(user))
   return user
 }
 
@@ -31,17 +45,27 @@ export async function signup(role, fields) {
   return login(fields.email, fields.password)
 }
 
-export function logout() {
-  localStorage.removeItem(TOKEN_KEY)
-  localStorage.removeItem(USER_KEY)
-}
+export async function getCurrentUser() {
+  const token = getToken();
 
-export function getStoredUser() {
+  if (!token) return null
+
   try {
-    return JSON.parse(localStorage.getItem(USER_KEY))
-  } catch {
+    return await request('/me', {method: 'GET'})
+  } catch (error) {
+    if (error.status === 401 || error.status === 403) {
+      console.warn('Session expired or invalid token. Logging out...')
+      logout()
+    } else {
+      console.error('Network glitch during auth check:', error.message)
+    }
+
     return null
   }
+}
+
+export function logout() {
+  localStorage.removeItem(TOKEN_KEY)
 }
 
 export function getToken() {
