@@ -47,6 +47,7 @@ function UpcomingAppointments() {
     return (
         <div className="widget-card">
             <h3>Upcoming Appointments</h3>
+            
             {events.length === 0 ? (
                 <p>No upcoming classes scheduled.</p>
             ) : (
