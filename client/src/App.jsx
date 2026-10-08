@@ -3,7 +3,10 @@ import { useState } from 'react'
 // Components
 import LoginForm from './components/LoginForm'
 import SignupForm from './components/SignupForm'
+
+// pages
 import BusinessDashboard from './pages/BusinessDashboard'
+import ClientDashboard from './pages/ClientDashboard'
 
 import { getStoredUser, logout } from './api/auth'
 import './styles/App.css'
@@ -18,24 +21,18 @@ function App() {
     setMode('login')
   }
 
+  // Business Route
   if (user?.role === 'business_owner') {
     return <BusinessDashboard user={user} onLogout={handleLogout} />
   }
 
+  // Client Route
+  if (user?.role === "client") {
+    return <ClientDashboard user={user} onLogout={handleLogout} />
+  }
+
   if (user) {
-    return (
-      <section className="auth-page">
-        <div className="auth-card">
-          <h2>Welcome, {user.first_name}!</h2>
-          <p>
-            Logged in as {user.email} ({user.role})
-          </p>
-          <button type="button" onClick={handleLogout}>
-            Log out
-          </button>
-        </div>
-      </section>
-    )
+    return <ClientDashboard user={user} onLogout={handleLogout} />
   }
 
   return (
