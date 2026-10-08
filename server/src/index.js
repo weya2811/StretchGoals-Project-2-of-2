@@ -6,8 +6,9 @@ import authRoutes from "./routes/auth.js";
 import requireAuth from "./middleware/requireAuth.js";
 import requireRole from "./middleware/requireRole.js";
 import eventRoutes from "./routes/events.js";
-import clientRoutes from "./routes/clients.js"
+import clientsRoutes from "./routes/clients.js"
 import businessRoutes from "./routes/businesses.js";
+import clientRoutes from "./routes/client.js";
 
 const app = express();
 const port = config.port;
@@ -22,17 +23,9 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use("/api/events", eventRoutes);
-app.use('/api/clients', clientRoutes);
+app.use('/api/clients', clientsRoutes);
 app.use("/api/businesses", businessRoutes);
-
-// testing routes
-app.get('/api/test/protected', requireAuth, (req, res) => {
-  res.json({ message: "Authentication works", user: req.user });
-});
-
-app.get('/api/test/owner', requireAuth, requireRole("business_owner"), (req, res) => {
-  res.json({ message: "Welcome owner", user: req.user });
-});
+app.use('/api/client', clientRoutes);
 
 // Catch all 404 errors
 app.use((req, res) => {

@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import db from "../db/connection.js";
 import { config } from "../config/env.js";
+import requireAuth from "../middleware/requireAuth.js";
 
 const router = Router();
 
@@ -158,6 +159,27 @@ router.post('/login', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "An error has occurred." });
+    }
+});
+
+router.get('/me', requireAuth, (req, res) => {
+    try {
+        const userId = req.user.userId || req.user.id;
+
+        const user = db.prepare(`
+            SELECT id, first_name, surname, email, role
+            FROM users
+            WHERE id = ?
+            `).get(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found"});
+        }
+
+        res.json(user);
+    } catch (error) {
+        console.error('Error in /me route:', error);
+        res.status(500).json({ error: 'Failed to authenticate user' });
     }
 });
 

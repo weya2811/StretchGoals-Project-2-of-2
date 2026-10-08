@@ -1,16 +1,38 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 // Components
 import LoginForm from './components/LoginForm'
 import SignupForm from './components/SignupForm'
-import BusinessDashboard from './pages/BusinessDashboard'
 
-import { getStoredUser, logout } from './api/auth'
+// pages
+import BusinessDashboard from './pages/BusinessDashboard'
+import ClientDashboard from './pages/ClientDashboard'
+
+import { getCurrentUser, getToken, logout } from './api/auth'
 import './styles/App.css'
 
 function App() {
-  const [user, setUser] = useState(getStoredUser)
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(() => Boolean(getToken()))
   const [mode, setMode] = useState('login')
+
+  useEffect(() => {
+    async function initAuth() {
+      const token = getToken();
+
+      if (!token) {
+        setUser(null)
+        setLoading(false)
+        return
+      }
+
+      const currentUser = await getCurrentUser();
+      setUser(currentUser)
+      setLoading(false)
+    }
+
+    initAuth();
+  }, [])
 
   function handleLogout() {
     logout()
@@ -18,24 +40,22 @@ function App() {
     setMode('login')
   }
 
+  if (loading) {
+    return null
+  }
+
+  // Business Route
   if (user?.role === 'business_owner') {
     return <BusinessDashboard user={user} onLogout={handleLogout} />
   }
 
+  // Client Route
+  if (user?.role === "client") {
+    return <ClientDashboard user={user} onLogout={handleLogout} />
+  }
+
   if (user) {
-    return (
-      <section className="auth-page">
-        <div className="auth-card">
-          <h2>Welcome, {user.first_name}!</h2>
-          <p>
-            Logged in as {user.email} ({user.role})
-          </p>
-          <button type="button" onClick={handleLogout}>
-            Log out
-          </button>
-        </div>
-      </section>
-    )
+    return <ClientDashboard user={user} onLogout={handleLogout} />
   }
 
   return (
