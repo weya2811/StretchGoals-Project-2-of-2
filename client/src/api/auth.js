@@ -3,6 +3,7 @@ const TOKEN_KEY = 'token'
 
 async function request(path, options = {}) {
   const token = getToken()
+  
   const headers = {
     'Content-Type': 'application/json',
     ...(token ? {Authorization: `Bearer ${token}`} : {}),

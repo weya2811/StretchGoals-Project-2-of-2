@@ -5,6 +5,7 @@ import { useState } from "react"
 
 // Components
 import ClientSidebar from '../components/ClientSidebar'
+import UpcomingAppointments from '../components/UpcomingAppointments'
 
 function ClientDashboard({user, onLogout}) {
     const [activePage, setActivePage] = useState("home")
@@ -20,6 +21,8 @@ function ClientDashboard({user, onLogout}) {
             <div className='dashboard-main'>
                 <h1>Welcome, {user.first_name}</h1>
             </div>
+
+            <UpcomingAppointments />
         </div>
     )
 }

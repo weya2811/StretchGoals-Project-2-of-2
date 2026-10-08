@@ -7,19 +7,23 @@ const router = express.Router();
 // Fetch upcoming events for client
 router.get('/upcoming-events', requireAuth, (req, res) => {
     try {
-        const clientId = req.user.userId || req.user?.id;
+        const clientId = req.user?.userId || req.user?.id;
+
+        if (!clientId) {
+            return res.status(401).json({ error: 'Unauthorized user token' });
+        }
 
         const query = `
             SELECT
-            events.id,
-            events.title,
-            events.start,
-            events.end
-            FROM events
-            JOIN users  ON events.user_id = users.id
-            WHERE events.client_id = ? AND datetime(events.end) >= datetime('now')
-            ORDER BY events.start ASC
-            LIMIT 5
+                e.id,
+                e.title,
+                e.start,
+                e.end,
+                (u.first_name || ' ' || u.surname) AS instructor_name
+            FROM events e
+            JOIN users u ON e.user_id = u.id
+            WHERE e.client_id = ? AND e.start >= datetime('now')
+            ORDER BY e.start ASC
         `;
 
         const events = db.prepare(query).all(clientId);
