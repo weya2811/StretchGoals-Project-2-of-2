@@ -24,11 +24,16 @@ router.get("/", requireAuth, (req, res) => {
 
 // POST /api/events — create a new event
 router.post("/", requireAuth, (req, res) => {
-    const { title, start, end, extendedProps } = req.body;
+    const { title, start, end, client_id, extendedProps } = req.body;
 
     if (!title || !start) {
         return res.status(400).json({ error: "Title and start are required" });
     }
+
+    const rawClientId = client_id || extendedProps?.client_id;
+    const sanitizedClientId = rawClientId ? Number(rawClientId) : null;
+
+    const userId = req.user?.userId || req.user?.id;
 
     const result = db.prepare(`
         INSERT INTO events (title, start, end, client_id, user_id)
@@ -37,8 +42,8 @@ router.post("/", requireAuth, (req, res) => {
         title,
         start,
         end,
-        extendedProps?.clientId || null,
-        req.user.userId
+        sanitizedClientId,
+        userId
     );
 
     res.status(201).json({ id: String(result.lastInsertRowid) });
