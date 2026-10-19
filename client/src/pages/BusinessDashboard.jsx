@@ -4,6 +4,7 @@ import Calendar from '../components/Calendar'
 import SalesOverview from '../components/SalesOverview'
 import ClientList from '../components/ClientList'
 import { getEvents } from '../api/events'
+import { getTemplateColours } from '../constants/classTemplates'
 import '../styles/Dashboard.css'
 
 import { getClients } from '../api/clients';
@@ -27,7 +28,14 @@ function BusinessDashboard({ user, onLogout }) {
   const [activeClients, setActiveClients] = useState(0);
   const [classBookings, setClassBookings] = useState(0);
 
+  // Reload whenever the dashboard is shown, so changes made on the
+  // Calendar page (added, moved or deleted events) appear straight away.
   useEffect(() => {
+    if (activePage !== 'dashboard') return
+
+    // Ignore a slow response if the user has already switched pages again
+    let ignore = false
+
     const fetchData = async () => {
         try {
             // Fetch all needed data
@@ -36,16 +44,19 @@ function BusinessDashboard({ user, onLogout }) {
                 getClients()
             ])
 
+            if (ignore) return
+
             if (eventsData && Array.isArray(eventsData)) {
                 setDashboardCalendarEvents(eventsData);
                 setClassBookings(eventsData.length);
             } else {
                 setDashboardCalendarEvents([]);
+                setClassBookings(0);
             }
             if (clientsData && Array.isArray(clientsData)) {
                 setActiveClients(clientsData.length)
             } else {
-                setActiveClients([]);
+                setActiveClients(0);
             }
 
         } catch (error) {
@@ -54,7 +65,11 @@ function BusinessDashboard({ user, onLogout }) {
     }
 
       fetchData();
-  }, [])
+
+      return () => {
+        ignore = true
+      }
+  }, [activePage])
 
 
   // Temporary dashboard statistics.
@@ -247,17 +262,14 @@ function BusinessDashboard({ user, onLogout }) {
     }
   }
 
-  // Maps the calendar's hex colour to the dashboard's CSS class.
-  const getEventColourClass = (event) => {
-    const colourMap = {
-      '#fbcfe8': 'event-pink',     // Private Lesson
-      '#bbf7d0': 'event-green',    // Corporate Yoga
-      '#bae6fd': 'event-blue',     // Yoga Therapy
-      '#fef08a': 'event-yellow',   // Personal Time
-      '#e9d5ff': 'event-purple',   // Yoga Class
-    }
+  // Use the same colours as the Calendar page for each class type.
+  const getEventColourStyle = (event) => {
+    const { bg, border } = getTemplateColours(event.title)
 
-    return colourMap[event.backgroundColor] || 'event-green'
+    return {
+      background: bg,
+      borderLeft: `3px solid ${border}`,
+    }
   }
 
   const renderScheduleRow = (item) => (
@@ -445,9 +457,12 @@ function BusinessDashboard({ user, onLogout }) {
 
                           {day.events.map((event) => (
                             <div
-                              className={`calendar-event ${getEventColourClass(event)}`}
+                              className="calendar-event"
                               key={event.id}
-                              style={getEventPosition(event)}
+                              style={{
+                                ...getEventPosition(event),
+                                ...getEventColourStyle(event),
+                              }}
                               title={`${event.title} ${formatEventTime(
                                 event.start
                               )} – ${formatEventTime(event.end)}`}

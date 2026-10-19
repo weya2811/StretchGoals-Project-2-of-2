@@ -7,21 +7,9 @@ import { Draggable } from '@fullcalendar/interaction';
 
 import { getEvents, createEvent, updateEvent, deleteEvent } from '../api/events';
 import { getClients } from '../api/clients';
+import { CLASS_TEMPLATES, getTemplateColours } from '../constants/classTemplates';
 
 import '../styles/Calendar.css';
-
-// Event templates
-const CLASS_TEMPLATES = [
-    { title: 'Private Lesson', bg: '#fbcfe8', border: '#f43f5e' },
-    { title: 'Corporate Yoga', bg: '#bbf7d0', border: '#16a34a' },
-    { title: 'Yoga Therapy', bg: '#bae6fd', border: '#0284c7' },
-    { title: 'Personal Time', bg: '#fef08a', border: '#ca8a04' },
-    { title: 'Yoga Class', bg: '#e9d5ff', border: '#9333ea' }
-];
-
-const TEMPLATE_MAP = Object.fromEntries(
-    CLASS_TEMPLATES.map((tpl) => [tpl.title, tpl])
-);
 
 export default function YogaCalendar() {
     const [clients, setClients] = useState([]);
@@ -119,7 +107,7 @@ export default function YogaCalendar() {
     const renderEventContent = useCallback((eventInfo) => {
         const { title, extendedProps, id } = eventInfo.event;
 
-        const template = TEMPLATE_MAP[title] || {bg: '#ffffff', border: '#cccccc' };
+        const template = getTemplateColours(title);
         const selectedClient = extendedProps?.clientId || '';
 
         // Update client in DB when the dropdown changes
