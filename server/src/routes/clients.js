@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     try {
         const stat = await db.prepare(
-            "SELECT id, first_name, surname FROM users WHERE role = 'client' ORDER BY first_name ASC"
+            "SELECT id, first_name, surname, email, created_at FROM users WHERE role = 'client' ORDER BY first_name ASC"
         );
 
         const rows = stat.all()

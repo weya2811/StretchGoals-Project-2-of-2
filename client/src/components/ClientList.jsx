@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
-import { getMyClients } from '../api/businesses'
+import { getClients } from "../api/clients"
 import '../styles/ClientList.css'
 
 function formatJoinedDate(value) {
-  // SQLite stores "YYYY-MM-DD HH:MM:SS" in UTC
   const date = new Date(`${value.replace(' ', 'T')}Z`)
 
   return date.toLocaleDateString('en-AU', {
@@ -19,7 +18,7 @@ function ClientList() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    getMyClients()
+    getClients()
       .then(setClients)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
@@ -66,7 +65,7 @@ function ClientList() {
                     {client.first_name} {client.surname}
                   </td>
                   <td>{client.email}</td>
-                  <td>{formatJoinedDate(client.joined_at)}</td>
+                  <td>{formatJoinedDate(client.created_at)}</td>
                 </tr>
               ))}
             </tbody>
