@@ -63,10 +63,10 @@ function BusinessDashboard({ user, onLogout }) {
 
     activeClientsChange: 8,
 
-    weeklyRevenue: 1260,
+    weeklyRevenue: 0,
     weeklyRevenueChange: 18,
 
-    weeklyNewClients: 6,
+    weeklyNewClients: 0,
     weeklyNewClientsChange: 20,
   }
 
@@ -345,7 +345,7 @@ function BusinessDashboard({ user, onLogout }) {
               <div className="summary-card">
                 <div className="summary-icon">👥</div>
                 <div>
-                  <h2>{dashboardStats.weeklyNewClients}</h2>
+                  <h2>{activeClients}</h2>
                   <p>New Clients</p>
                   <span className="positive-change">
                     ↑ {dashboardStats.weeklyNewClientsChange}% vs. last week

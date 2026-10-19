@@ -2,38 +2,7 @@ import '../styles/SalesOverview.css'
 
 function SalesOverview() {
   const recentSales = [
-    {
-      id: 1,
-      customer: 'Sarah Mitchell',
-      service: 'Hatha Yoga',
-      date: '4 Oct 2026',
-      amount: '$35.00',
-      status: 'Paid',
-    },
-    {
-      id: 2,
-      customer: 'Emma Johnson',
-      service: 'Gentle Flow',
-      date: '3 Oct 2026',
-      amount: '$30.00',
-      status: 'Paid',
-    },
-    {
-      id: 3,
-      customer: 'James Taylor',
-      service: 'Power Yoga',
-      date: '2 Oct 2026',
-      amount: '$45.00',
-      status: 'Paid',
-    },
-    {
-      id: 4,
-      customer: 'Olivia Roberts',
-      service: 'Hatha Yoga',
-      date: '1 Oct 2026',
-      amount: '$35.00',
-      status: 'Paid',
-    },
+    
   ]
 
   return (
@@ -54,20 +23,20 @@ function SalesOverview() {
       <div className="sales-summary">
         <div className="sales-card">
           <p className="card-label">Total Sales</p>
-          <h2>$2,480</h2>
-          <p className="sales-change">↑ 12% from last month</p>
+          <h2>0</h2>
+          <p className="sales-change">↑ 0% from last month</p>
         </div>
 
         <div className="sales-card">
           <p className="card-label">Total Bookings</p>
-          <h2>42</h2>
-          <p className="sales-change">↑ 8% from last month</p>
+          <h2>0</h2>
+          <p className="sales-change">↑ 0% from last month</p>
         </div>
 
         <div className="sales-card">
           <p className="card-label">Average Booking</p>
-          <h2>$59.05</h2>
-          <p className="sales-change">↑ 3% from last month</p>
+          <h2>0</h2>
+          <p className="sales-change">↑ 0% from last month</p>
         </div>
       </div>
 
@@ -99,27 +68,27 @@ function SalesOverview() {
 
             <div className="chart-bars">
               <div className="chart-column">
-                <div className="chart-bar" style={{ height: '42%' }}></div>
+                <div className="chart-bar" style={{ height: '0%' }}></div>
                 <span>May</span>
               </div>
               <div className="chart-column">
-                <div className="chart-bar" style={{ height: '55%' }}></div>
+                <div className="chart-bar" style={{ height: '0%' }}></div>
                 <span>Jun</span>
               </div>
               <div className="chart-column">
-                <div className="chart-bar" style={{ height: '48%' }}></div>
+                <div className="chart-bar" style={{ height: '0%' }}></div>
                 <span>Jul</span>
               </div>
               <div className="chart-column">
-                <div className="chart-bar" style={{ height: '72%' }}></div>
+                <div className="chart-bar" style={{ height: '0%' }}></div>
                 <span>Aug</span>
               </div>
               <div className="chart-column">
-                <div className="chart-bar" style={{ height: '65%' }}></div>
+                <div className="chart-bar" style={{ height: '0%' }}></div>
                 <span>Sep</span>
               </div>
               <div className="chart-column">
-                <div className="chart-bar" style={{ height: '88%' }}></div>
+                <div className="chart-bar" style={{ height: '0%' }}></div>
                 <span>Oct</span>
               </div>
             </div>
