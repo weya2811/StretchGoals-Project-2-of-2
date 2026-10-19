@@ -525,36 +525,7 @@
   font-size: 9px;
 }
 
-/* Event colours */
-.event-green {
-  background: #def3df;
-  border-left: 3px solid #48a852;
-}
-
-.event-orange {
-  background: #fff0df;
-  border-left: 3px solid #e8953d;
-}
-
-.event-blue {
-  background: #e2f2ff;
-  border-left: 3px solid #4d9ed7;
-}
-
-.event-pink {
-  background: #fde2ea;
-  border-left: 3px solid #e95a84;
-}
-
-.event-purple {
-  background: #eee5ff;
-  border-left: 3px solid #8865d6;
-}
-
-.event-yellow {
-  background: #fff3d2;
-  border-left: 3px solid #e3ad37;
-}
+/* Event colours come from constants/classTemplates.js, shared with the Calendar page */
 
 /* -------------------- */
 /* UPCOMING SCHEDULE    */
