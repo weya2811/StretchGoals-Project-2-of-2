@@ -327,7 +327,6 @@ function BusinessDashboard({ user, onLogout }) {
                   <h2>{classBookings}</h2>
                   <p>Class Bookings</p>
                   <span className="positive-change">
-                    ↑ {dashboardStats.weeklyClassBookingsChange}% vs. last week
                   </span>
                 </div>
               </div>
@@ -338,7 +337,6 @@ function BusinessDashboard({ user, onLogout }) {
                   <h2>{activeClients}</h2>
                   <p>Active Clients</p>
                   <span className="positive-change">
-                    ↑ {dashboardStats.activeClientsChange}% vs. last week
                   </span>
                 </div>
               </div>
@@ -349,7 +347,6 @@ function BusinessDashboard({ user, onLogout }) {
                   <h2>${dashboardStats.weeklyRevenue.toLocaleString()}</h2>
                   <p>Revenue</p>
                   <span className="positive-change">
-                    ↑ {dashboardStats.weeklyRevenueChange}% vs. last week
                   </span>
                 </div>
               </div>
@@ -360,7 +357,6 @@ function BusinessDashboard({ user, onLogout }) {
                   <h2>{activeClients}</h2>
                   <p>New Clients</p>
                   <span className="positive-change">
-                    ↑ {dashboardStats.weeklyNewClientsChange}% vs. last week
                   </span>
                 </div>
               </div>
